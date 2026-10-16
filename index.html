@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weight Tracker BD &#x2014; &#x993;&#x99c;&#x9a8; &#x99f;&#x9cd;&#x9b0;&#x9cd;&#x9af;&#x9be;&#x995;&#x9be;&#x9b0;</title>
+<meta name="description" content="Offline bilingual EN/&#x9ac;&#x9be;&#x982;&#x9b2;&#x9be; body-weight tracker: log weight, BMI, goals and trends. Your data stays in your browser.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div>
+      <h1>Weight Tracker BD</h1>
+      <p class="tagline" data-i18n="tagline">Log your weight, see your progress.</p>
+    </div>
+    <button id="langBtn" class="btn lang" type="button">&#x9ac;&#x9be;&#x982;&#x9b2;&#x9be;</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="dashboard" data-i18n="tabDashboard" type="button">Dashboard</button>
+    <button class="tab" data-tab="log" data-i18n="tabLog" type="button">Log</button>
+    <button class="tab" data-tab="data" data-i18n="tabData" type="button">Data</button>
+  </nav>
+
+  <section id="panel-dashboard" class="panel active">
+    <div class="cards">
+      <div class="card big"><div class="label" data-i18n="latest">Latest weight</div>
+        <div class="value" id="statLatest">&#x2014;</div><div class="sub" id="statLatestDate"></div></div>
+      <div class="card"><div class="label" data-i18n="change7d">Change &#xb7; 7 days</div>
+        <div class="value" id="statChange7">&#x2014;</div><div class="sub"><span data-i18n="avg7d">Avg &#xb7; 7 days</span>: <span id="statAvg7">&#x2014;</span></div></div>
+      <div class="card"><div class="label" data-i18n="change30d">Change &#xb7; 30 days</div>
+        <div class="value" id="statChange30">&#x2014;</div><div class="sub"><span data-i18n="avg30d">Avg &#xb7; 30 days</span>: <span id="statAvg30">&#x2014;</span></div></div>
+      <div class="card"><div class="label" data-i18n="total">Total change</div>
+        <div class="value" id="statTotal">&#x2014;</div><div class="sub" id="statCount">0 entries</div></div>
+      <div class="card"><div class="label" data-i18n="bmi">BMI</div>
+        <div class="value" id="statBmi">&#x2014;</div><div class="sub" id="statBmiCat"></div></div>
+      <div class="card"><div class="label" data-i18n="perWeek">Needed per week</div>
+        <div class="value small" id="statPerWeek">&#x2014;</div></div>
+    </div>
+
+    <div class="card goal-card">
+      <div class="label" data-i18n="goal">Goal progress</div>
+      <div class="goal-row"><span id="goalText"></span><strong id="goalPct"></strong></div>
+      <div class="bar"><div id="goalBar" class="bar-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="label" data-i18n="trend">Weight trend (last 30 entries)</div>
+      <svg id="chart" class="chart" viewBox="0 0 640 180" role="img" aria-label="Weight trend chart"></svg>
+    </div>
+  </section>
+
+  <section id="panel-log" class="panel">
+    <div class="grid2">
+      <form id="entryForm" class="card" novalidate>
+        <h2 data-i18n="addEntry">Add / update entry</h2>
+        <label><span data-i18n="date">Date</span>
+          <input id="entryDate" type="date" required></label>
+        <label><span data-i18n="weight">Weight (kg)</span>
+          <input id="entryWeight" type="number" inputmode="decimal" min="20" max="400" step="0.1" placeholder="e.g. 68.5" required></label>
+        <label><span data-i18n="note">Note (optional)</span>
+          <input id="entryNote" type="text" maxlength="200" placeholder="e.g. after morning walk"></label>
+        <button class="btn primary" type="submit" data-i18n="saveEntry">Save entry</button>
+        <p id="entryMsg" class="msg" role="status"></p>
+      </form>
+
+      <form id="profileForm" class="card" novalidate>
+        <h2 data-i18n="profile">Profile</h2>
+        <label><span data-i18n="height">Height (cm)</span>
+          <input id="profileHeight" type="number" inputmode="decimal" min="100" max="250" step="0.1" placeholder="e.g. 170"></label>
+        <label><span data-i18n="targetWeight">Target weight (kg)</span>
+          <input id="profileTarget" type="number" inputmode="decimal" min="20" max="400" step="0.1" placeholder="e.g. 65"></label>
+        <label><span data-i18n="targetDate">Target date</span>
+          <input id="profileTargetDate" type="date"></label>
+        <p class="hint" data-i18n="profileHint">Height powers BMI. Target weight + date power the goal bar and per-week pace.</p>
+        <button class="btn primary" type="submit" data-i18n="saveProfile">Save profile</button>
+        <p id="profileMsg" class="msg" role="status"></p>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="history">History</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Weight</th><th>Note</th><th></th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-data" class="panel">
+    <div class="card">
+      <h2 data-i18n="tabData">Data</h2>
+      <p class="hint" data-i18n="dataHint">Your data lives only in this browser (localStorage). Export a backup any time.</p>
+      <div class="row">
+        <button id="exportBtn" class="btn primary" type="button" data-i18n="export">Export JSON</button>
+        <label class="btn" for="importFile" data-i18n="import">Import JSON</label>
+        <input id="importFile" type="file" accept=".json,application/json" hidden>
+        <button id="eraseBtn" class="btn danger" type="button" data-i18n="erase">Erase all data</button>
+      </div>
+      <p id="dataMsg" class="msg" role="status"></p>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap footer">
+  <p data-i18n="footer">Personal tracker. Not medical advice. BMI is a screening tool &#x2014; talk to a clinician about what it means for you.</p>
+</footer>
+
+<script src="js/logic.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
